@@ -1,9 +1,5 @@
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 public struct FloorRect
 {
     public int x1, y1, x2, y2;
@@ -18,6 +14,48 @@ public struct FloorRect
 
     public int Width => x2 - x1 + 1;
     public int Height => y2 - y1 + 1;
+
+
+    public override string ToString()
+    {
+        return $"FloorRect({x1}, {y1}, {x2}, {y2})";
+    }
+}
+
+public class QuadtreeNode
+{
+    public FloorRect Rect;
+    public bool? IsLand; // true=land, false=water, null=mixed
+    public QuadtreeNode[] Children;
+
+    public bool IsLeaf => Children == null;
+
+    public QuadtreeNode(FloorRect rect)
+    {
+        Rect = rect;
+    }
+    public override string ToString()
+    {
+        return $"QuadtreeNode({Rect.x1}, {Rect.y1}, {Rect.x2}, {Rect.y2}) - IsLand: {IsLand}";
+    }
+
+    static public string PrintFullTree(QuadtreeNode node, int depth = 0)
+    {
+        if (node == null) return "";
+
+        string indent = new string(' ', depth * 2);
+        string result = $"{indent}{node}\n";
+
+        if (!node.IsLeaf)
+        {
+            foreach (var child in node.Children)
+            {
+                result += PrintFullTree(child, depth + 1);
+            }
+        }
+
+        return result;
+    }
 }
 
 
@@ -46,44 +84,10 @@ public class FloorBuilder : MonoBehaviour
     public bool drawPreview = true;
 
     private bool[,] landMap;
-    private float[,] NoiseMap;
-
-    private Texture2D previewNoise;
-    public Texture2D NoiseMapTexture
-    {
-        get { return previewNoise; }
-    }
-    private Texture2D previewTile;
-
-    public Texture2D TileMapTexture
-    {
-        get { return previewTile; }
-    }
-
-#if UNITY_EDITOR
-    public void EditorGenerateIslandPreview()
-    {
-        GenerateIsland();
-
-        previewNoise = new Texture2D(width, height);
-        previewTile = new Texture2D(width, height);
-
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                float value = NoiseMap[x, y];
-                Color color = new Color(value, value, value);
-                previewNoise.SetPixel(x, y, color);
-
-                previewTile.SetPixel(x, y, landMap[x, y] ? Color.green : Color.blue);
-            }
-        }
-
-        previewNoise.Apply();
-        previewTile.Apply();
-    }
-#endif
+    private float[,] noiseMap;
+    public float[,] NoiseMap => noiseMap;
+    private QuadtreeNode quadtreeRoot;
+    public QuadtreeNode QuadtreeRoot => quadtreeRoot;
 
     float[,] GenerateNoiseMap()
     {
@@ -148,9 +152,44 @@ public class FloorBuilder : MonoBehaviour
 
         return noiseMap;
     }
+    private QuadtreeNode BuildQuadtree(FloorRect rect, int minSize = 2)
+    {
+        bool first = landMap[rect.x1, rect.y1];
+        bool uniform = true;
 
+        for (int y = rect.y1; y <= rect.y2; y++)
+        {
+            for (int x = rect.x1; x <= rect.x2; x++)
+            {
+                if (landMap[x, y] != first)
+                {
+                    uniform = false;
+                    break;
+                }
+            }
+            if (!uniform) break;
+        }
 
-    void GenerateIsland()
+        var node = new QuadtreeNode(rect);
+        if (uniform || rect.Width <= minSize || rect.Height <= minSize)
+        {
+            node.IsLand = first;
+            return node;
+        }
+
+        int midX = (rect.x1 + rect.x2) / 2;
+        int midY = (rect.y1 + rect.y2) / 2;
+
+        node.Children = new QuadtreeNode[4];
+        node.Children[0] = BuildQuadtree(new FloorRect(rect.x1, rect.y1, midX, midY), minSize); // top-left
+        node.Children[1] = BuildQuadtree(new FloorRect(midX + 1, rect.y1, rect.x2, midY), minSize); // top-right
+        node.Children[2] = BuildQuadtree(new FloorRect(rect.x1, midY + 1, midX, rect.y2), minSize); // bottom-left
+        node.Children[3] = BuildQuadtree(new FloorRect(midX + 1, midY + 1, rect.x2, rect.y2), minSize); // bottom-right
+
+        return node;
+    }
+
+    public void GenerateIsland()
     {
         float[,] noiseMap = GenerateNoiseMap();
         landMap = new bool[width, height];
@@ -163,35 +202,12 @@ public class FloorBuilder : MonoBehaviour
             }
         }
 
-        NoiseMap = noiseMap;
+        this.noiseMap = noiseMap;
+        this.quadtreeRoot = BuildQuadtree(new FloorRect(0, 0, width - 1, height - 1));
     }
 
     void Start()
     {
         GenerateIsland();
     }
-
-
-#if UNITY_EDITOR
-    void OnDrawGizmos()
-    {
-        if (drawPreview && previewNoise != null)
-        {
-            Gizmos.DrawGUITexture(new Rect(10, 10, width * 0.1f, height * 0.1f), previewNoise);
-            Gizmos.DrawGUITexture(new Rect(10 + width * 0.1f + 10, 10, width * 0.1f, height * 0.1f), previewTile);
-        }
-    }
-    void OnValidate()
-    {
-        if (width <= 0) width = 1;
-        if (height <= 0) height = 1;
-        if (noiseScale <= 0) noiseScale = 1f;
-        if (islandFalloff < 0 || islandFalloff > 1) islandFalloff = Mathf.Clamp01(islandFalloff);
-        if (octaves < 1) octaves = 1;
-
-        GenerateIsland();
-    }
-#endif
-
-
 }
