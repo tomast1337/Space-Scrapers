@@ -70,7 +70,7 @@ public class MapFloorBuilderEditorPreview : Editor
 
         if (GUILayout.Button("Generate Preview"))
         {
-            builder.GenerateIsland();
+            builder.GenerateMap();
             EditorUtility.SetDirty(builder); // Mark as dirty so Unity redraws
         }
 

@@ -65,6 +65,9 @@ public class MapFloorBuilder : MonoBehaviour
     [Header("Settings")]
     public int width = 100;
     public int height = 100;
+
+    public float Width => width;
+    public float Height => height;
     public float noiseScale = 20f;
     [Range(0, 1)] public float threshold = 0.4f;
     public float islandFalloff = 0.45f;
@@ -84,6 +87,7 @@ public class MapFloorBuilder : MonoBehaviour
     public bool drawPreview = true;
 
     private bool[,] landMap;
+    public bool[,] LandMap => landMap;
     private float[,] noiseMap;
     public float[,] NoiseMap => noiseMap;
     private QuadtreeNode quadtreeRoot;
@@ -189,7 +193,7 @@ public class MapFloorBuilder : MonoBehaviour
         return node;
     }
 
-    public void GenerateIsland()
+    public void GenerateMap()
     {
         float[,] noiseMap = GenerateNoiseMap();
         landMap = new bool[width, height];
@@ -204,10 +208,5 @@ public class MapFloorBuilder : MonoBehaviour
 
         this.noiseMap = noiseMap;
         this.quadtreeRoot = BuildQuadtree(new FloorRect(0, 0, width - 1, height - 1));
-    }
-
-    void Start()
-    {
-        GenerateIsland();
     }
 }
