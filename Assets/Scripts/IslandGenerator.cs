@@ -11,7 +11,8 @@ public class IslandGenerator : MonoBehaviour
     [SerializeField] private float tileSize = 10f;
     private MapFloorBuilder mapFloorBuilder;
 
-
+    [SerializeField][Range(1, 5)] private float minEdgeScale = 1.5f;
+    [SerializeField][Range(1, 5)] private float maxEdgeScale = 2; // Scale multiplier for edge tiles
 
 
     private void Awake()
@@ -64,8 +65,8 @@ public class IslandGenerator : MonoBehaviour
 
                 var rect = node.Rect;
                 Vector3 position = new Vector3(
-                    rect.x1 * tileSize + xOffset,
-                    -5f,
+                    rect.x1 * tileSize + xOffset - (tileSize * 0.5f),
+                    0,
                     rect.y1 * tileSize + zOffset);
                 // Instantiate land tile at the calculated position
                 GameObject landTileInstance = Instantiate(landTile, position, Quaternion.identity, transform);
@@ -110,9 +111,11 @@ public class IslandGenerator : MonoBehaviour
                         // random rotation for edge tiles
                         Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
                         // randomly scale multiplier for edge tiles
-                        float scaleMultiplier = Random.Range(1.5f, 2f);
+                        float scaleMultiplierX = Random.Range(minEdgeScale, maxEdgeScale);
+                        float scaleMultiplierY = Random.Range(minEdgeScale, maxEdgeScale);
+                        float scaleMultiplierZ = Random.Range(minEdgeScale, maxEdgeScale);
                         // apply scale to the edge tile
-                        edgeTile.transform.localScale = new Vector3(scaleMultiplier, scaleMultiplier, scaleMultiplier);
+                        edgeTile.transform.localScale = new Vector3(scaleMultiplierX, scaleMultiplierY, scaleMultiplierZ);
                         var foo = Instantiate(edgeTile, position, randomRotation, transform);
                         foo.name = $"EdgeTile_{x}_{y}";
                     }
