@@ -2,8 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(FloorBuilder))]
-public class FloorBuilderEditor : Editor
+[CustomEditor(typeof(MapFloorBuilder))]
+public class MapFloorBuilderEditorPreview : Editor
 {
 
     readonly float SIZE = 128f;
@@ -66,7 +66,7 @@ public class FloorBuilderEditor : Editor
     {
         DrawDefaultInspector();
 
-        FloorBuilder builder = (FloorBuilder)target;
+        MapFloorBuilder builder = (MapFloorBuilder)target;
 
         if (GUILayout.Button("Generate Preview"))
         {

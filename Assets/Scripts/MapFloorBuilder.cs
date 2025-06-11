@@ -59,7 +59,7 @@ public class QuadtreeNode
 }
 
 
-public class FloorBuilder : MonoBehaviour
+public class MapFloorBuilder : MonoBehaviour
 {
 
     [Header("Settings")]
