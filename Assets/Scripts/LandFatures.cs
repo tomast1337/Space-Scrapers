@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MapFloorBuilder))]
+[RequireComponent(typeof(IslandGenerator))]
 public class LandFatures : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private List<GameObject> rockPrefabs = new List<GameObject>();
     [SerializeField][Range(0, 1)] private float rockSpawnChance = 0.1f; // Chance to spawn a rock per valid tile
-    [SerializeField][Range(0, 1)] private float slopeThreshold = 0.5f; // Slope sensitivity for rock placement
-    [SerializeField][Range(0, 1)] private float rockHeightThreshold = 0.6f; // Only spawn rocks above this normalized height
-
-
     private MapFloorBuilder mapFloorBuilder;
+    private IslandGenerator islandGenerator;
+    private GameObject rocksParent;
     private void Awake()
     {
         mapFloorBuilder = GetComponent<MapFloorBuilder>();
-
+        islandGenerator = GetComponent<IslandGenerator>();
+        rocksParent = new GameObject("Rocks");
+        rocksParent.transform.SetParent(transform);
     }
 
     private void Start()
@@ -45,24 +46,30 @@ public class LandFatures : MonoBehaviour
         var noiseMap = mapFloorBuilder.NoiseMap;
         float width = mapFloorBuilder.Width;
         float height = mapFloorBuilder.Height;
+        // Calculate offset to center the island
+        float tileSize = islandGenerator.TileSize;
+        float xOffset = -width * tileSize * 0.5f;
+        float zOffset = -height * tileSize * 0.5f;
 
         for (int x = 1; x < width - 1; x++) // avoid edges for slope check
         {
             for (int y = 1; y < height - 1; y++)
             {
-                if (!landMap[x, y]) continue;
-
-                float heightValue = noiseMap[x, y];
-                if (heightValue < rockHeightThreshold) continue;
-
-                float slope = CalculateSlope(noiseMap, x, y);
-                if (slope < slopeThreshold) continue;
-
-                if (UnityEngine.Random.value < rockSpawnChance)
+                //check if its not an edge tile
+                if (mapFloorBuilder.IsEdgeTile(x, y))
+                    continue;
+                if (landMap[x, y] && noiseMap[x, y] <= 0.5f)
                 {
-                    Vector3 worldPos = new Vector3(x, 0, y); // Adjust Y if elevation is visualized
-                    var rockPrefab = rockPrefabs[UnityEngine.Random.Range(0, rockPrefabs.Count)];
-                    Instantiate(rockPrefab, worldPos, Quaternion.identity, transform);
+                    float slope = CalculateSlope(noiseMap, x, y);
+                    if (slope < 0.1f && UnityEngine.Random.value < rockSpawnChance * 0.5f) // Lower chance for lower noise values
+                    {
+                        Vector3 position = new Vector3(
+                            x * tileSize + xOffset,
+                            0, // Assuming flat terrain for simplicity
+                            y * tileSize + zOffset);
+                        GameObject rockPrefab = rockPrefabs[UnityEngine.Random.Range(0, rockPrefabs.Count)];
+                        Instantiate(rockPrefab, position, Quaternion.identity, rocksParent.transform);
+                    }
                 }
             }
         }

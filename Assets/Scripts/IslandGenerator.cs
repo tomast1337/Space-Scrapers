@@ -9,6 +9,7 @@ public class IslandGenerator : MonoBehaviour
     [SerializeField] private List<GameObject> edgeTiles = new List<GameObject>();
     [Header("Settings")]
     [SerializeField] private float tileSize = 10f;
+    public float TileSize => tileSize; // Expose tile size for other components
     private MapFloorBuilder mapFloorBuilder;
 
     [SerializeField][Range(1, 5)] private float minEdgeScale = 1.5f;
