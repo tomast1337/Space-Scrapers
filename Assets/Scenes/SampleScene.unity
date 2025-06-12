@@ -1461,6 +1461,7 @@ GameObject:
   - component: {fileID: 506621609}
   - component: {fileID: 506621610}
   - component: {fileID: 506621611}
+  - component: {fileID: 506621612}
   m_Layer: 0
   m_Name: MapGenerator
   m_TagString: Untagged
@@ -1497,13 +1498,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 128
   height: 128
-  noiseScale: 20
-  threshold: 0.288
+  noiseScale: 25.85
+  threshold: 0.266
   islandFalloff: 1
-  octaves: 2
-  persistence: 0.595
-  lacunarity: 1.43
-  seed: 0
+  octaves: 7
+  persistence: 0.071
+  lacunarity: 5.28
+  seed: 1997
   drawPreview: 0
 --- !u!114 &506621611
 MonoBehaviour:
@@ -1523,8 +1524,30 @@ MonoBehaviour:
   - {fileID: 387641437981389796, guid: 7b9c263d90b1e16ba812cb2c93476764, type: 3}
   - {fileID: 1884036074377262348, guid: 6e054153d889747ae85b334a2481864c, type: 3}
   tileSize: 10
-  minEdgeScale: 1.97
-  maxEdgeScale: 2.96
+  minEdgeScale: 2.42
+  maxEdgeScale: 3.73
+--- !u!114 &506621612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506621607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ee0524568e299a3da7b1c8d3c4d5c51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rockPrefabs:
+  - {fileID: 9132386174658203721, guid: acd866fbde5352bc38b9d48f1c2ab739, type: 3}
+  - {fileID: 6280383010391785581, guid: bf54bb89604c01e13973ef705932dce0, type: 3}
+  - {fileID: 6239405104525959098, guid: 10db050348a92d2d7a8826f6e70baddc, type: 3}
+  - {fileID: 8548915152280430247, guid: f7e0cbbff180bd48897df6762d06df4d, type: 3}
+  - {fileID: 3207691832543355935, guid: 9a1c00397ea9cbe21a40d61df4601d31, type: 3}
+  - {fileID: 4537449548436633275, guid: a0df4e4ae9c5ecaa4bf9f47afaa25f5f, type: 3}
+  - {fileID: 9115042058724176727, guid: 8887060d1eddaab9ab9e831b3423b3e4, type: 3}
+  - {fileID: 2791784056042413174, guid: f05807944e100e83cb60b2503ea008b5, type: 3}
+  rockSpawnChance: 0.238
 --- !u!4 &507538747 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: f0f3d779a105c8a4196e5ce471752bc0, type: 3}
