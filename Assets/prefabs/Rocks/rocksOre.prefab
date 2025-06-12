@@ -13,6 +13,10 @@ PrefabInstance:
       value: rocksOre
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: c19b84b7034a2e640af2244b6fae89be, type: 3}
+      propertyPath: m_TagString
+      value: Ground
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: c19b84b7034a2e640af2244b6fae89be, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
