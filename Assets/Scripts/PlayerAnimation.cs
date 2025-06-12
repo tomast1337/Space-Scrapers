@@ -2,7 +2,6 @@ using UnityEngine;
 using DG.Tweening;
 
 [RequireComponent(typeof(Collider))]
-[RequireComponent(typeof(Rigidbody))]
 public class PlayerAnimation : MonoBehaviour
 {
     [SerializeField] private GameObject head;
@@ -11,7 +10,6 @@ public class PlayerAnimation : MonoBehaviour
     [SerializeField] private GameObject rightArm;
 
     private Collider _collider;
-    private Rigidbody _rigidbody;
 
     private Tween leftArmTween;
     private Tween rightArmTween;
@@ -19,38 +17,41 @@ public class PlayerAnimation : MonoBehaviour
     private float swingSpeed = 1f;
     private float swingAngle = 30f;
 
+    private Vector3 lastPosition;
+    private Vector3 currentVelocity;
+
     void Awake()
     {
         _collider = GetComponent<Collider>();
-        _rigidbody = GetComponent<Rigidbody>();
+        lastPosition = transform.position;
     }
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         StartSwingingArms();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Vector3 horizontalVelocity = _rigidbody.linearVelocity;
-        horizontalVelocity.y = 0f;
+        // Calculate movement velocity
+        currentVelocity = (transform.position - lastPosition) / Time.deltaTime;
+        Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
 
         float speed = horizontalVelocity.magnitude;
 
-        // Only face movement direction if moving
+        // Rotate body toward movement direction
         if (speed > 0.1f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity);
             body.transform.rotation = Quaternion.Slerp(body.transform.rotation, targetRotation, Time.deltaTime * 10f);
         }
 
-        float targetSpeed = Mathf.Clamp(speed * 0.5f, 0.5f, 3f); // map speed to animation speed range
+        float targetSpeed = Mathf.Clamp(speed * 0.5f, 0.5f, 3f); // adjust animation speed
         swingSpeed = targetSpeed;
 
         UpdateTweenSpeeds();
+
+        lastPosition = transform.position; // store for next frame
     }
 
     private void StartSwingingArms()
