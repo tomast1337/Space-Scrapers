@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public struct FloorRect
@@ -62,6 +64,8 @@ public class QuadtreeNode
 public class MapFloorBuilder : MonoBehaviour
 {
 
+    public event Action OnMapGenerated;
+
     [Header("Settings")]
     public int width = 100;
     public int height = 100;
@@ -92,6 +96,18 @@ public class MapFloorBuilder : MonoBehaviour
     public float[,] NoiseMap => noiseMap;
     private QuadtreeNode quadtreeRoot;
     public QuadtreeNode QuadtreeRoot => quadtreeRoot;
+
+    private void Awake()
+    {
+        StartCoroutine(DelayedGenerateMap());
+    }
+
+    private IEnumerator DelayedGenerateMap()
+    {
+        yield return null; // wait one frame
+        GenerateMap();
+        OnMapGenerated?.Invoke();
+    }
 
     float[,] GenerateNoiseMap()
     {
@@ -207,6 +223,33 @@ public class MapFloorBuilder : MonoBehaviour
         }
 
         this.noiseMap = noiseMap;
-        this.quadtreeRoot = BuildQuadtree(new FloorRect(0, 0, width - 1, height - 1));
+        quadtreeRoot = BuildQuadtree(new FloorRect(0, 0, width - 1, height - 1));
+
+        Debug.Log($"[MapFloorBuilder] Map generated with dimensions: {width}x{height}, Land tiles: {CountLandTiles()}");
+    }
+
+    private int CountLandTiles()
+    {
+        int count = 0;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (landMap[x, y]) count++;
+            }
+        }
+        return count;
+    }
+
+    public bool IsEdgeTile(int x, int y)
+    {
+
+        // Check adjacent tiles (4-directional)
+        if (x > 0 && !landMap[x - 1, y]) return true;
+        if (x < width - 1 && !landMap[x + 1, y]) return true;
+        if (y > 0 && !landMap[x, y - 1]) return true;
+        if (y < height - 1 && !landMap[x, y + 1]) return true;
+
+        return false;
     }
 }
