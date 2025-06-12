@@ -1,19 +1,28 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
+using System;
 [RequireComponent(typeof(MapFloorBuilder))]
 public class IslandGenerator : MonoBehaviour
 {
+    public event Action OnIslandGenerated;
+
     [Header("Tiles")]
     [SerializeField] private GameObject landTile;
     [SerializeField] private List<GameObject> edgeTiles = new List<GameObject>();
     [Header("Settings")]
     [SerializeField] private float tileSize = 10f;
-    public float TileSize => tileSize; // Expose tile size for other components
+    public float TileSize => tileSize;
     private MapFloorBuilder mapFloorBuilder;
 
     [SerializeField][Range(1, 5)] private float minEdgeScale = 1.5f;
-    [SerializeField][Range(1, 5)] private float maxEdgeScale = 2; // Scale multiplier for edge tiles
+    [SerializeField][Range(1, 5)] private float maxEdgeScale = 2;
+
+    private float xOffset;
+    private float zOffset;
+    public float XOffset => xOffset;
+    public float ZOffset => zOffset;
+
 
     GameObject floorTilesParent;
     GameObject edgeTilesParent;
@@ -55,8 +64,8 @@ public class IslandGenerator : MonoBehaviour
         var quadtreeRoot = mapFloorBuilder.QuadtreeRoot;
 
         // Calculate offset to center the island
-        float xOffset = -width * tileSize * 0.5f;
-        float zOffset = -height * tileSize * 0.5f;
+        xOffset = -width * tileSize * 0.5f;
+        zOffset = -height * tileSize * 0.5f;
 
         // First pass: add land tiles , leaves of the quadtree
         void Traverse(QuadtreeNode node)
@@ -129,6 +138,10 @@ public class IslandGenerator : MonoBehaviour
                 }
             }
         }
+
+        Debug.Log($"[IslandGenerator] Island generated with {floorTilesParent.transform.childCount} land tiles and {edgeTilesParent.transform.childCount} edge tiles.");
+
+        OnIslandGenerated?.Invoke();
     }
 
 

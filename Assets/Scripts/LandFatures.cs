@@ -32,9 +32,6 @@ public class LandFatures : MonoBehaviour
 
     private void HandleMapGenerated()
     {
-        float width = mapFloorBuilder.Width;
-        float height = mapFloorBuilder.Height;
-        Debug.Log($"[LandFatures] Map generated, scattering rocks on a {width}x{height} map.");
         ScatterRocks();
     }
 

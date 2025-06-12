@@ -1,65 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-
-public struct FloorRect
-{
-    public int x1, y1, x2, y2;
-
-    public FloorRect(int x1, int y1, int x2, int y2)
-    {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-    }
-
-    public int Width => x2 - x1 + 1;
-    public int Height => y2 - y1 + 1;
-
-
-    public override string ToString()
-    {
-        return $"FloorRect({x1}, {y1}, {x2}, {y2})";
-    }
-}
-
-public class QuadtreeNode
-{
-    public FloorRect Rect;
-    public bool? IsLand; // true=land, false=water, null=mixed
-    public QuadtreeNode[] Children;
-
-    public bool IsLeaf => Children == null;
-
-    public QuadtreeNode(FloorRect rect)
-    {
-        Rect = rect;
-    }
-    public override string ToString()
-    {
-        return $"QuadtreeNode({Rect.x1}, {Rect.y1}, {Rect.x2}, {Rect.y2}) - IsLand: {IsLand}";
-    }
-
-    static public string PrintFullTree(QuadtreeNode node, int depth = 0)
-    {
-        if (node == null) return "";
-
-        string indent = new string(' ', depth * 2);
-        string result = $"{indent}{node}\n";
-
-        if (!node.IsLeaf)
-        {
-            foreach (var child in node.Children)
-            {
-                result += PrintFullTree(child, depth + 1);
-            }
-        }
-
-        return result;
-    }
-}
-
 
 public class MapFloorBuilder : MonoBehaviour
 {
@@ -224,21 +166,6 @@ public class MapFloorBuilder : MonoBehaviour
 
         this.noiseMap = noiseMap;
         quadtreeRoot = BuildQuadtree(new FloorRect(0, 0, width - 1, height - 1));
-
-        Debug.Log($"[MapFloorBuilder] Map generated with dimensions: {width}x{height}, Land tiles: {CountLandTiles()}");
-    }
-
-    private int CountLandTiles()
-    {
-        int count = 0;
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                if (landMap[x, y]) count++;
-            }
-        }
-        return count;
     }
 
     public bool IsEdgeTile(int x, int y)
